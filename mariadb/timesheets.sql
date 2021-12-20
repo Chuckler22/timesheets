@@ -134,6 +134,11 @@ ALTER TABLE `timesheets`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+INSERT INTO `employees` (`id`, `first`, `last`, `email`, `flexcf`, `toilcf`, `novellname`, `default_daystart`, `default_daystop`, `default_break1start`, `default_break1stop`, `default_break2start`, `default_break2stop`, `default_break3start`, `default_break3stop`, `supervisor`) VALUES
+(1, 'Bernhard', 'Riemann', 'Bernhard.Riemann@example.com', NULL, NULL, 'riemann', '07:45:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 0),
+(2, 'Carl', 'Gauss', 'Carl.Gauss@example.com', '-01:05:00', NULL, 'gauss', '07:45:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 1),
+(3, 'Leonhard', 'Euler', 'Leonhard.Euler@example.com', '+07:18:00', '+01:00:00', 'euler', '07:45:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 2),
+(4, 'Euclid', 'of Alexandria', 'Euclid.ofAlexandria@example.com', NULL, NULL, 'euclid', '09:45:00', '18:00:00', '13:30:00', '14:00:00', NULL, NULL, NULL, NULL, 2);
 
 --
 -- AUTO_INCREMENT for table `days`
@@ -152,18 +157,6 @@ ALTER TABLE `employees`
 --
 ALTER TABLE `timesheets`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-
-INSERT INTO `employees` (`id`, `first`, `last`, `email`, `flexcf`, `toilcf`, `novellname`, `default_daystart`, `default_daystop`, `default_break1start`, `default_break1stop`, `default_break2start`, `default_break2stop`, `default_break3start`, `default_break3stop`, `supervisor`) VALUES
-(1, 'Bernhard', 'Riemann', 'Bernhard.Riemann@example.com', NULL, NULL, 'riemann', '07:45:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 0),
-(2, 'Carl', 'Gauss', 'Carl.Gauss@example.com', '-01:05:00', NULL, 'gauss', '07:45:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 1),
-(3, 'Leonhard', 'Euler', 'Leonhard.Euler@example.com', '+07:18:00', '+01:00:00', 'euler', '07:45:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 2),
-(4, 'Euclid', 'of Alexandria', 'Euclid.ofAlexandria@example.com', NULL, NULL, 'euclid', '09:45:00', '18:00:00', '13:30:00', '14:00:00', NULL, NULL, NULL, NULL, 2);
-
-
-
-
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

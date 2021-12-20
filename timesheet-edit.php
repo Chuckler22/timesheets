@@ -5,29 +5,13 @@
   }
   $loggedinuser = $_SESSION["username"];
 
+  require("include.php");
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-  $servername = "mysql";
-  $username = "root";
-  $password = "secret";
-  $dbname = "timesheet";
-
-  // Create connection
-  $conn = mysqli_connect($servername, $username, $password, $dbname);
-  // Check connection
-  if (!$conn) { 
-    die("Connection failed: " . mysqli_connect_error());
-  }
-  
-  date_default_timezone_set('Australia/Brisbane');
-
-
-
-
+  // If we're loading this form, it's expected that the loggedinuser is editing their own timesheet
+  // based on the contents of $_GET["fne"]
   // error handling
   if (!isset($_GET["fne"])) {
+    header('Refresh: 1; URL = /index.php');
     exit("You must select a fortnight!");
   }
   if (!preg_match('/\d{4}-\d{2}-\d{2}/',$_GET["fne"])) {

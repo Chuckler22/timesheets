@@ -1,14 +1,15 @@
 version: "3.8"
 services:
   timesheet-app: 
-    image: php:8.0-apache
+    build: ./apache
     ports:
       - 80:80
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
   mysql:
-    image: mariadb:latest
+    # image: mariadb:latest
+    build: ./mariadb
     volumes:
       - timesheet-mysql-data:/var/lib/mysql
     environment: 
