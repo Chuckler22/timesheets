@@ -6,6 +6,12 @@
   $loggedinuser = $_SESSION["username"];
 
   require("config.inc.php");
+  // Create connection
+  $conn = mysqli_connect($servername, $username, $password, $dbname);
+  // Check connection
+  if (!$conn) { 
+    die("Connection failed: " . mysqli_connect_error());
+  }
 
   // If we're loading this form, it's expected that the loggedinuser is editing their own timesheet
   // based on the contents of $_GET["fne"]
