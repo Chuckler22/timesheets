@@ -14,6 +14,7 @@
     header('Refresh: 1; URL = /index.php');
     exit("You must select a fortnight!");
   }
+  // $_GET["fne"] must be in the format YYYY-MM-DD
   if (!preg_match('/\d{4}-\d{2}-\d{2}/',$_GET["fne"])) {
     exit("Invalid timesheet format.");
   } else {
@@ -29,6 +30,7 @@
     if (mysqli_num_rows($result) == 1) {
       $getData = mysqli_fetch_assoc($result);
       $timesheet = $getData["timesheets_id"];
+      // if the timesheet has already been submitted, redirect to timesheet-view
       if (!$getData["submitted"] == NULL) {
         header("Location: /timesheet-view.php?fne=".$fne);
         exit("Header redirect no worky");
@@ -37,7 +39,6 @@
       exit("Unable to find timesheet.");
     }
   }
-
 
 
   if($_SERVER['REQUEST_METHOD'] == "POST") { 
@@ -50,7 +51,8 @@
       exit("Logout Redirect");
     }
 
-   
+    // if method is $_POST and it's not for a Home or a Logout, it must be a Save or a Submit.
+    // Prepare the many many variables for Save. 
     $vars = array("day1start","day2start","day3start","day4start","day5start","day6start","day7start","day8start","day9start","day10start","day11start","day12start","day13start","day14start");
       array_push($vars,"day1stop","day2stop","day3stop","day4stop","day5stop","day6stop","day7stop","day8stop","day9stop","day10stop","day11stop","day12stop","day13stop","day14stop");
       array_push($vars,"day1break1start","day2break1start","day3break1start","day4break1start","day5break1start","day6break1start","day7break1start","day8break1start","day9break1start","day10break1start","day11break1start","day12break1start","day13break1start","day14break1start");
@@ -108,17 +110,22 @@
       mysqli_stmt_execute($updateStatement);
     }
 
+    // 
     if(!empty($_POST["submit"])) {
       $sql = "UPDATE `timesheets` SET `submitted` = CONVERT_TZ(NOW(),'SYSTEM','Australia/Brisbane') WHERE `fne_date` = ? and `id` = ?";
       $updateStatement = mysqli_prepare($conn, $sql);
       mysqli_stmt_bind_param($updateStatement,"si",$fne,$timesheet);
       mysqli_stmt_execute($updateStatement);
+      // this is added because this didn't work on one system because of "CONVERT_TZ(NOW(),'SYSTEM','Australia/Brisbane')"
+      if (mysqli_affected_rows($conn) == 0) {
+        exit("Unable to submit timesheet.");
+      }
       header("Location: /timesheet-view.php?fne=".$fne);
       exit("Header redirect no worky");
     }
   } // endif method = POST
 
-
+  // Main SQL query for display timesheet
   $sql = "SELECT employees.id as employees_id, employees.first, employees.last, employees.email, employees.flexcf, employees.toilcf, employees.novellname,
     timesheets.id as timesheets_id, timesheets.employee, timesheets.fne_date, 
   days.timesheet_id, days.dof, .days.datex as datex, days.daystart, days.daystop, days.break1start, days.break1stop, days.break2start, days.break2stop, days.break3start, days.break3stop, days.oncall, days.lvannual, days.lvsick, days.lvtoil, days.lvphcon, days.lvflex, days.oc1start, days.oc1stop, days.oc2start, days.oc2stop, days.oc3start, days.oc3stop, days.ot1start, days.ot1stop, days.ot2start, days.ot2stop, days.ot3start, days.ot3stop, days.toil1start, days.toil1stop, days.toil2start, days.toil2stop, days.toil3start, days.toil3stop
@@ -179,8 +186,6 @@
     <?=$last; ?>
 </h1>
     <h2><?=$email; ?></h2>
-
-
 <style type="text/css">
   .tg  {border-collapse:collapse;border-spacing:0;}
   .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
@@ -218,8 +223,29 @@
 <tbody>
 <?php
 
-  function writeRow2($bg,$linename,$shortdesc,$a,$b) {
+// this function writes a table row. If it's a regular time, like day1start, day2breakstart etc, or if it
+// has a value, it'll display, otherwise it's hidden by default. 
+  function writeRow2($bg,$linename,$shortdesc,$a,$b,$initialvalue = NULL) {
     $x = 0;
+    global $day1start,$day2start,$day3start,$day4start,$day5start,$day6start,$day7start,$day8start,$day9start,$day10start,$day11start,$day12start,$day13start,$day14start;
+    global $day1stop,$day2stop,$day3stop,$day4stop,$day5stop,$day6stop,$day7stop,$day8stop,$day9stop,$day10stop,$day11stop,$day12stop,$day13stop,$day14stop;
+    global $day1break1start,$day2break1start,$day3break1start,$day4break1start,$day5break1start,$day6break1start,$day7break1start,$day8break1start,$day9break1start,$day10break1start,$day11break1start,$day12break1start,$day13break1start,$day14break1start;
+    global $day1break1stop,$day2break1stop,$day3break1stop,$day4break1stop,$day5break1stop,$day6break1stop,$day7break1stop,$day8break1stop,$day9break1stop,$day10break1stop,$day11break1stop,$day12break1stop,$day13break1stop,$day14break1stop;
+    global $day1break2start,$day2break2start,$day3break2start,$day4break2start,$day5break2start,$day6break2start,$day7break2start,$day8break2start,$day9break2start,$day10break2start,$day11break2start,$day12break2start,$day13break2start,$day14break2start;
+    global $day1break2stop,$day2break2stop,$day3break2stop,$day4break2stop,$day5break2stop,$day6break2stop,$day7break2stop,$day8break2stop,$day9break2stop,$day10break2stop,$day11break2stop,$day12break2stop,$day13break2stop,$day14break2stop;
+    global $day1break3start,$day2break3start,$day3break3start,$day4break3start,$day5break3start,$day6break3start,$day7break3start,$day8break3start,$day9break3start,$day10break3start,$day11break3start,$day12break3start,$day13break3start,$day14break3start;
+    global $day1break3stop,$day2break3stop,$day3break3stop,$day4break3stop,$day5break3stop,$day6break3stop,$day7break3stop,$day8break3stop,$day9break3stop,$day10break3stop,$day11break3stop,$day12break3stop,$day13break3stop,$day14break3stop;
+
+    $alwaysshow = array("day1start","day2start","day3start","day4start","day5start","day6start","day7start","day8start","day9start","day10start","day11start","day12start","day13start","day14start");
+    array_push($alwaysshow,"day1stop","day2stop","day3stop","day4stop","day5stop","day6stop","day7stop","day8stop","day9stop","day10stop","day11stop","day12stop","day13stop","day14stop");
+    array_push($alwaysshow,"day1break1start","day2break1start","day3break1start","day4break1start","day5break1start","day6break1start","day7break1start","day8break1start","day9break1start","day10break1start","day11break1start","day12break1start","day13break1start","day14break1start");
+    array_push($alwaysshow,"day1break1stop","day2break1stop","day3break1stop","day4break1stop","day5break1stop","day6break1stop","day7break1stop","day8break1stop","day9break1stop","day10break1stop","day11break1stop","day12break1stop","day13break1stop","day14break1stop");
+    array_push($alwaysshow,"day1break2start","day2break2start","day3break2start","day4break2start","day5break2start","day6break2start","day7break2start","day8break2start","day9break2start","day10break2start","day11break2start","day12break2start","day13break2start","day14break2start");
+    array_push($alwaysshow,"day1break2stop","day2break2stop","day3break2stop","day4break2stop","day5break2stop","day6break2stop","day7break2stop","day8break2stop","day9break2stop","day10break2stop","day11break2stop","day12break2stop","day13break2stop","day14break2stop");
+    array_push($alwaysshow,"day1break3start","day2break3start","day3break3start","day4break3start","day5break3start","day6break3start","day7break3start","day8break3start","day9break3start","day10break3start","day11break3start","day12break3start","day13break3start","day14break3start");
+    array_push($alwaysshow,"day1break3stop","day2break3stop","day3break3stop","day4break3stop","day5break3stop","day6break3stop","day7break3stop","day8break3stop","day9break3stop","day10break3stop","day11break3stop","day12break3stop","day13break3stop","day14break3stop");
+    array_push($alwaysshow,"flexobal","tota","fulltime","flextaken","flexearned","flexcbal");
+
     global $day1lvannual,$day2lvannual,$day3lvannual,$day4lvannual,$day5lvannual,$day6lvannual,$day7lvannual,$day8lvannual,$day9lvannual,$day10lvannual,$day11lvannual,$day12lvannual,$day13lvannual,$day14lvannual;
     global $day1lvsick,$day2lvsick,$day3lvsick,$day4lvsick,$day5lvsick,$day6lvsick,$day7lvsick,$day8lvsick,$day9lvsick,$day10lvsick,$day11lvsick,$day12lvsick,$day13lvsick,$day14lvsick;
     global $day1lvtoil,$day2lvtoil,$day3lvtoil,$day4lvtoil,$day5lvtoil,$day6lvtoil,$day7lvtoil,$day8lvtoil,$day9lvtoil,$day10lvtoil,$day11lvtoil,$day12lvtoil,$day13lvtoil,$day14lvtoil;
@@ -243,8 +269,16 @@
     global $day1toil2stop,$day2toil2stop,$day3toil2stop,$day4toil2stop,$day5toil2stop,$day6toil2stop,$day7toil2stop,$day8toil2stop,$day9toil2stop,$day10toil2stop,$day11toil2stop,$day12toil2stop,$day13toil2stop,$day14toil2stop;
     global $day1toil3start,$day2toil3start,$day3toil3start,$day4toil3start,$day5toil3start,$day6toil3start,$day7toil3start,$day8toil3start,$day9toil3start,$day10toil3start,$day11toil3start,$day12toil3start,$day13toil3start,$day14toil3start;
     global $day1toil3stop,$day2toil3stop,$day3toil3stop,$day4toil3stop,$day5toil3stop,$day6toil3stop,$day7toil3stop,$day8toil3stop,$day9toil3stop,$day10toil3stop,$day11toil3stop,$day12toil3stop,$day13toil3stop,$day14toil3stop;
+
+    $day1flexobal = $day2flexobal = $day3flexobal = $day4flexobal = $day5flexobal = $day6flexobal = $day7flexobal = $day8flexobal = $day9flexobal = $day10flexobal = $day11flexobal = $day12flexobal = $day13flexobal = $day14flexobal = NULL;
+    $day1tota = $day2tota = $day3tota = $day4tota = $day5tota = $day6tota = $day7tota = $day8tota = $day9tota = $day10tota = $day11tota = $day12tota = $day13tota = $day14tota = NULL;
+    $day1fulltime = $day2fulltime = $day3fulltime = $day4fulltime = $day5fulltime = $day6fulltime = $day7fulltime = $day8fulltime = $day9fulltime = $day10fulltime = $day11fulltime = $day12fulltime = $day13fulltime = $day14fulltime = NULL;
+    $day1flextaken = $day2flextaken = $day3flextaken = $day4flextaken = $day5flextaken = $day6flextaken = $day7flextaken = $day8flextaken = $day9flextaken = $day10flextaken = $day11flextaken = $day12flextaken = $day13flextaken = $day14flextaken = NULL;
+    $day1flexearned = $day2flexearned = $day3flexearned = $day4flexearned = $day5flexearned = $day6flexearned = $day7flexearned = $day8flexearned = $day9flexearned = $day10flexearned = $day11flexearned = $day12flexearned = $day13flexearned = $day14flexearned = NULL;
+    $day1flexcbal = $day2flexcbal = $day3flexcbal = $day4flexcbal = $day5flexcbal = $day6flexcbal = $day7flexcbal = $day8flexcbal = $day9flexcbal = $day10flexcbal = $day11flexcbal = $day12flexcbal = $day13flexcbal = $day14flexcbal = NULL;
+
     for ($x = 1; $x <= 14; $x++) {
-      if (${"day".$x.$shortdesc} != NULL) {
+      if ((${"day".$x.$shortdesc} != NULL) || (in_array("day".$x.$shortdesc,$alwaysshow)) || isset($initialvalue)) {
         $style = "show";
       }
     }
@@ -256,93 +290,72 @@
       echo "    <td class=\"tg-0pky\">$linename</td>\n";
     }
     for ($x = $a; $x <= $b; $x++) {
-      echo "    <td class=\"$bg\"><input type=\"text\" class=\"input-time\" id=\"day".$x.$shortdesc."\" name=\"day".$x.$shortdesc."\" value=\"".${"day".$x.$shortdesc}."\" onchange=\"myInit()\"></td>\n";
+      if (isset($initialvalue)) {
+        echo "    <td class=\"tg-0lax\"><p id=\"day".$x.$shortdesc."\" name=\"day".$x.$shortdesc."\">$initialvalue</p></td>\n";
+      } else {
+        echo "    <td class=\"$bg\"><input type=\"text\" class=\"input-time\" id=\"day".$x.$shortdesc."\" name=\"day".$x.$shortdesc."\" value=\"".${"day".$x.$shortdesc}."\" onchange=\"myInit()\"></td>\n";
+      }
     }
     if ($b == 14) {
       echo "  </tr>\n";
     }
   }
 
-  function writeRow3($bg,$linename,$shortdesc,$a,$b) {
-    $x = 0;
-    global $day1start,$day2start,$day3start,$day4start,$day5start,$day6start,$day7start,$day8start,$day9start,$day10start,$day11start,$day12start,$day13start,$day14start;
-    global $day1stop,$day2stop,$day3stop,$day4stop,$day5stop,$day6stop,$day7stop,$day8stop,$day9stop,$day10stop,$day11stop,$day12stop,$day13stop,$day14stop;
-    global $day1break1start,$day2break1start,$day3break1start,$day4break1start,$day5break1start,$day6break1start,$day7break1start,$day8break1start,$day9break1start,$day10break1start,$day11break1start,$day12break1start,$day13break1start,$day14break1start;
-    global $day1break1stop,$day2break1stop,$day3break1stop,$day4break1stop,$day5break1stop,$day6break1stop,$day7break1stop,$day8break1stop,$day9break1stop,$day10break1stop,$day11break1stop,$day12break1stop,$day13break1stop,$day14break1stop;
-    global $day1break2start,$day2break2start,$day3break2start,$day4break2start,$day5break2start,$day6break2start,$day7break2start,$day8break2start,$day9break2start,$day10break2start,$day11break2start,$day12break2start,$day13break2start,$day14break2start;
-    global $day1break2stop,$day2break2stop,$day3break2stop,$day4break2stop,$day5break2stop,$day6break2stop,$day7break2stop,$day8break2stop,$day9break2stop,$day10break2stop,$day11break2stop,$day12break2stop,$day13break2stop,$day14break2stop;
-    global $day1break3start,$day2break3start,$day3break3start,$day4break3start,$day5break3start,$day6break3start,$day7break3start,$day8break3start,$day9break3start,$day10break3start,$day11break3start,$day12break3start,$day13break3start,$day14break3start;
-    global $day1break3stop,$day2break3stop,$day3break3stop,$day4break3stop,$day5break3stop,$day6break3stop,$day7break3stop,$day8break3stop,$day9break3stop,$day10break3stop,$day11break3stop,$day12break3stop,$day13break3stop,$day14break3stop;
-    
-    if ($a == 1) {
-      echo "  <tr id=\"".$shortdesc."\">\n";
-      echo "    <td class=\"tg-0pky\">$linename</td>\n";
-    }
-    for ($x = $a; $x <= $b; $x++) {
-      echo "    <td class=\"$bg\"><input type=\"text\" class=\"input-time\" id=\"day".$x.$shortdesc."\" name=\"day".$x.$shortdesc."\" value=\"".${"day".$x.$shortdesc}."\" onchange=\"myInit()\"></td>\n";
-    }
-    if ($b == 14) {
-      echo "  </tr>\n";
-    }
-  }
+  // calculate the carry-forward balances of flex and toil
+  // (expr1) ? (value if true) : (value if false)
+  $flexm = preg_match('/^[\d:\+]+$/',$flexcf) ? 1 : -1;
+  $time   = explode(":", $flexcf);
+  $hour   = abs($time[0]) * 60 * 60 * 1000;
+  $minute = abs($time[1]) * 60 * 1000;
+  $flexcf = ($hour + $minute) * $flexm;
 
-  function writeBasicRow($linename,$shortdesc,$initialvalue,$a,$b) {
-    $x = 0;
-    if ($a == 1) {
-      echo "  <tr>\n";
-      echo "    <td class=\"tg-0lax\">$linename</td>\n";
-    }
-    for ($x = $a; $x <= $b; $x++) {
-      echo "    <td class=\"tg-0lax\"><p id=\"day".$x.$shortdesc."\" name=\"day".$x.$shortdesc."\">$initialvalue</p></td>\n";
-    }
-    if ($b == 14) {
-      echo "  </tr>\n";
-    }
-  }
+  $toilm = preg_match('/^[\d:\+]+$/',$toilcf) ? 1 : -1;
+  $time   = explode(":", $toilcf);  
+  $hour   = abs($time[0]) * 60 * 60 * 1000;
+  $minute = abs($time[1]) * 60 * 1000;
+  $toilcf = ($hour + $minute) * $toilm;
 
-  writeRow3("tg-0lax","Day Start","start",1,5);
-  writeRow3("tg-266k","Day Start","start",6,7);
-  writeRow3("tg-0lax","Day Start","start",8,12);
-  writeRow3("tg-266k","Day Start","start",13,14);
-  writeRow3("tg-7od5","Break1 Start","break1start",1,5);
-  writeRow3("tg-266k","Break1 Start","break1start",6,7);
-  writeRow3("tg-7od5","Break1 Start","break1start",8,12);
-  writeRow3("tg-266k","Break1 Start","break1start",13,14);
-  writeRow3("tg-7od5","Break1 Stop","break1stop",1,5);
-  writeRow3("tg-266k","Break1 Stop","break1stop",6,7);
-  writeRow3("tg-7od5","Break1 Stop","break1stop",8,12);
-  writeRow3("tg-266k","Break1 Stop","break1stop",13,14);
-  writeRow3("tg-ncd7","Break2 Start","break2start",1,5);
-  writeRow3("tg-266k","Break2 Start","break2start",6,7);
-  writeRow3("tg-ncd7","Break2 Start","break2start",8,12);
-  writeRow3("tg-266k","Break2 Start","break2start",13,14);
-  writeRow3("tg-ncd7","Break2 Stop","break2stop",1,5);
-  writeRow3("tg-266k","Break2 Stop","break2stop",6,7);
-  writeRow3("tg-ncd7","Break2 Stop","break2stop",8,12);
-  writeRow3("tg-266k","Break2 Stop","break2stop",13,14);
-  writeRow3("tg-7od5","Break3 Start","break3start",1,5);
-  writeRow3("tg-266k","Break3 Start","break3start",6,7);
-  writeRow3("tg-7od5","Break3 Start","break3start",8,12);
-  writeRow3("tg-266k","Break3 Start","break3start",13,14);
-  writeRow3("tg-7od5","Break3 Stop","break3stop",1,5);
-  writeRow3("tg-266k","Break3 Stop","break3stop",6,7);
-  writeRow3("tg-7od5","Break3 Stop","break3stop",8,12);
-  writeRow3("tg-266k","Break3 Stop","break3stop",13,14);
-  writeRow3("tg-0pky","Day Stop","stop",1,5);
-  writeRow3("tg-266k","Day Stop","stop",6,7);
-  writeRow3("tg-0pky","Day Stop","stop",8,12);
-  writeRow3("tg-266k","Day Stop","stop",13,14);
+  writeRow2("tg-0lax","Day Start","start",1,5);
+  writeRow2("tg-266k","Day Start","start",6,7);
+  writeRow2("tg-0lax","Day Start","start",8,12);
+  writeRow2("tg-266k","Day Start","start",13,14);
+  writeRow2("tg-7od5","Break1 Start","break1start",1,5);
+  writeRow2("tg-266k","Break1 Start","break1start",6,7);
+  writeRow2("tg-7od5","Break1 Start","break1start",8,12);
+  writeRow2("tg-266k","Break1 Start","break1start",13,14);
+  writeRow2("tg-7od5","Break1 Stop","break1stop",1,5);
+  writeRow2("tg-266k","Break1 Stop","break1stop",6,7);
+  writeRow2("tg-7od5","Break1 Stop","break1stop",8,12);
+  writeRow2("tg-266k","Break1 Stop","break1stop",13,14);
+  writeRow2("tg-ncd7","Break2 Start","break2start",1,5);
+  writeRow2("tg-266k","Break2 Start","break2start",6,7);
+  writeRow2("tg-ncd7","Break2 Start","break2start",8,12);
+  writeRow2("tg-266k","Break2 Start","break2start",13,14);
+  writeRow2("tg-ncd7","Break2 Stop","break2stop",1,5);
+  writeRow2("tg-266k","Break2 Stop","break2stop",6,7);
+  writeRow2("tg-ncd7","Break2 Stop","break2stop",8,12);
+  writeRow2("tg-266k","Break2 Stop","break2stop",13,14);
+  writeRow2("tg-7od5","Break3 Start","break3start",1,5);
+  writeRow2("tg-266k","Break3 Start","break3start",6,7);
+  writeRow2("tg-7od5","Break3 Start","break3start",8,12);
+  writeRow2("tg-266k","Break3 Start","break3start",13,14);
+  writeRow2("tg-7od5","Break3 Stop","break3stop",1,5);
+  writeRow2("tg-266k","Break3 Stop","break3stop",6,7);
+  writeRow2("tg-7od5","Break3 Stop","break3stop",8,12);
+  writeRow2("tg-266k","Break3 Stop","break3stop",13,14);
+  writeRow2("tg-0pky","Day Stop","stop",1,5);
+  writeRow2("tg-266k","Day Stop","stop",6,7);
+  writeRow2("tg-0pky","Day Stop","stop",8,12);
+  writeRow2("tg-266k","Day Stop","stop",13,14);
   echo "<tr>";
   echo "  <td class=\"tg-0lax\">Total</td>";
   for ($x = 1; $x <= 14; $x++) {
     echo "<td class=\"tg-0lax\"><p id=\"day".$x."tot\">00:00</p></td>";
   }
   echo "</tr>";
-
   echo "<tr>";
   echo "<td class=\"tg-0pky\">Oncall</td>";
   for ($x = 1; $x <= 14; $x++) {
-    // echo ${"day".$x."oncall"};
     echo "<td class=\"tg-0lax\">";
     echo "<input type=\"radio\" id=\"day".$x."oc_no\" name=\"day".$x."oc\" value=\"No\" ";
       if (${"day".$x."oncall"} == NULL) {
@@ -361,12 +374,9 @@
     echo ">24/7<br>";
     echo "</td>";
   }
-
-
   echo "</tr>";
   echo "<tr><td colspan=\"15\">";
-  echo "<input type=\"button\" value=\"Unhide Leave\" style=\"width: 100px;\" onclick=\"unhide('lv')\">";
-  echo "<input type=\"button\" value=\"Rehide Leave\" style=\"width: 100px;\" onclick=\"rehide('lv')\">";
+  echo "<input type=\"button\" value=\"Toggle Leave\" style=\"width: 100px;\" onclick=\"togglevis('lv')\">";
   echo "</td></tr>";
   writeRow2("tg-ncd7","Annual Leave","lvannual",1,5);
   writeRow2("tg-266k","Annual Leave","lvannual",6,7);
@@ -394,11 +404,8 @@
     echo "<td class=\"tg-0lax\"><p id=\"day".$x."lvtot\">00:00</p></td>";
   }
   echo "</tr>";
-
-
   echo "<tr><td colspan=\"15\">";
-  echo "<input type=\"button\" value=\"Unhide Oncall\" style=\"width: 100px;\" onclick=\"unhide('oc')\">";
-  echo "<input type=\"button\" value=\"Rehide Oncall\" style=\"width: 100px;\" onclick=\"rehide('oc')\">";
+  echo "<input type=\"button\" value=\"Toggle Oncall\" style=\"width: 100px;\" onclick=\"togglevis('oc')\">";
   echo "</td></tr>";
   writeRow2("tg-7od5","OC1 Start","oc1start",1,5);
   writeRow2("tg-266k","OC1 Start","oc1start",6,7);
@@ -408,7 +415,6 @@
   writeRow2("tg-266k","OC1 Stop","oc1stop",6,7);
   writeRow2("tg-7od5","OC1 Stop","oc1stop",8,12);
   writeRow2("tg-266k","OC1 Stop","oc1stop",13,14);
-
   writeRow2("tg-ncd7","OC2 Start","oc2start",1,5);
   writeRow2("tg-266k","OC2 Start","oc2start",6,7);
   writeRow2("tg-ncd7","OC2 Start","oc2start",8,12);
@@ -417,7 +423,6 @@
   writeRow2("tg-266k","OC2 Stop","oc2stop",6,7);
   writeRow2("tg-ncd7","OC2 Stop","oc2stop",8,12);
   writeRow2("tg-266k","OC2 Stop","oc2stop",13,14);
-
   writeRow2("tg-7od5","OC3 Start","oc3start",1,5);
   writeRow2("tg-266k","OC3 Start","oc3start",6,7);
   writeRow2("tg-7od5","OC3 Start","oc3start",8,12);
@@ -432,12 +437,9 @@
     echo "<td class=\"tg-0lax\"><p id=\"day".$x."octot\">00:00</p></td>";
   }
   echo "</tr>";
-
   echo "<tr><td colspan=\"15\">";
-  echo "<input type=\"button\" value=\"Unhide OT\" style=\"width: 100px;\" onclick=\"unhide('ot')\">";
-  echo "<input type=\"button\" value=\"Rehide OT\" style=\"width: 100px;\" onclick=\"rehide('ot')\">";
+  echo "<input type=\"button\" value=\"Toggle OT\" style=\"width: 100px;\" onclick=\"togglevis('ot')\">";
   echo "</td></tr>";
-  //function writeRow2($bg,$linename,$shortdesc,$longdesc,$a,$b) {
   writeRow2("tg-7od5","OT1 Start","ot1start",1,5);
   writeRow2("tg-266k","OT1 Start","ot1start",6,7);
   writeRow2("tg-7od5","OT1 Start","ot1start",8,12);
@@ -446,7 +448,6 @@
   writeRow2("tg-266k","OT1 Stop","ot1stop",6,7);
   writeRow2("tg-7od5","OT1 Stop","ot1stop",8,12);
   writeRow2("tg-266k","OT1 Stop","ot1stop",13,14);
-
   writeRow2("tg-ncd7","OT2 Start","ot2start",1,5);
   writeRow2("tg-266k","OT2 Start","ot2start",6,7);
   writeRow2("tg-ncd7","OT2 Start","ot2start",8,12);
@@ -455,7 +456,6 @@
   writeRow2("tg-266k","OT2 Stop","ot2stop",6,7);
   writeRow2("tg-ncd7","OT2 Stop","ot2stop",8,12);
   writeRow2("tg-266k","OT2 Stop","ot2stop",13,14);
-
   writeRow2("tg-7od5","OT3 Start","ot3start",1,5);
   writeRow2("tg-266k","OT3 Start","ot3start",6,7);
   writeRow2("tg-7od5","OT3 Start","ot3start",8,12);
@@ -470,13 +470,9 @@
     echo "<td class=\"tg-0lax\"><p id=\"day".$x."ottot\">00:00</p></td>";
   }
   echo "</tr>";
-
-
   echo "<tr><td colspan=\"15\">";
-  echo "<input type=\"button\" value=\"Unhide TOIL\" style=\"width: 100px;\" onclick=\"unhide('toil');\">";
-  echo "<input type=\"button\" value=\"Rehide TOIL\" style=\"width: 100px;\" onclick=\"rehide('toil');\">";
+  echo "<input type=\"button\" value=\"Toggle TOIL\" style=\"width: 100px;\" onclick=\"togglevis('toil');\">";
   echo "</td></tr>";
-  //function writeRow2($bg,$linename,$shortdesc,$longdesc,$a,$b) {
   writeRow2("tg-7od5","TOIL1 Start","toil1start",1,5);
   writeRow2("tg-266k","TOIL1 Start","toil1start",6,7);
   writeRow2("tg-7od5","TOIL1 Start","toil1start",8,12);
@@ -485,7 +481,6 @@
   writeRow2("tg-266k","TOIL1 Stop","toil1stop",6,7);
   writeRow2("tg-7od5","TOIL1 Stop","toil1stop",8,12);
   writeRow2("tg-266k","TOIL1 Stop","toil1stop",13,14);
-
   writeRow2("tg-ncd7","TOIL2 Start","toil2start",1,5);
   writeRow2("tg-266k","TOIL2 Start","toil2start",6,7);
   writeRow2("tg-ncd7","TOIL2 Start","toil2start",8,12);
@@ -494,7 +489,6 @@
   writeRow2("tg-266k","TOIL2 Stop","toil2stop",6,7);
   writeRow2("tg-ncd7","TOIL2 Stop","toil2stop",8,12);
   writeRow2("tg-266k","TOIL2 Stop","toil2stop",13,14);
-
   writeRow2("tg-7od5","TOIL3 Start","toil3start",1,5);
   writeRow2("tg-266k","TOIL3 Start","toil3start",6,7);
   writeRow2("tg-7od5","TOIL3 Start","toil3start",8,12);
@@ -527,39 +521,22 @@
     echo "<td class=\"tg-0lax\"><p id=\"day".$x."toilcbal\">00:00</p></td>";
   }
   echo "</tr>";
-
-
-  // (expr1) ? (value if true) : (value if false)
-  $flexm = preg_match('/^[\d:\+]+$/',$flexcf) ? 1 : -1;
-  $time   = explode(":", $flexcf);
-  $hour   = abs($time[0]) * 60 * 60 * 1000;
-  $minute = abs($time[1]) * 60 * 1000;
-  $flexcf = ($hour + $minute) * $flexm;
-
-  $toilm = preg_match('/^[\d:\+]+$/',$toilcf) ? 1 : -1;
-  $time   = explode(":", $toilcf);  
-  $hour   = abs($time[0]) * 60 * 60 * 1000;
-  $minute = abs($time[1]) * 60 * 1000;
-  $toilcf = ($hour + $minute) * $toilm;
-
   echo "<tr>";
   echo "  <td colspan=\"15\">";
   echo "    <div id=\"day0flexcbal\" style=\"display: none;\">" . $flexcf . "</div>";
   echo "    <div id=\"day0toilcbal\" style=\"display: none;\">" . $toilcf . "</div>";
   echo "  </td>";
   echo "</tr>";
-
-  writeBasicRow("Flex Opening Balance","flexobal","00:00",1,14);
-  writeBasicRow("Ordinary Hours","tota","00:00",1,14);
-  writeBasicRow("Full Time Std","fulltime","07:36",1,5);
-  writeBasicRow("Full Time Std","fulltime","00:00",6,7);
-  writeBasicRow("Full Time Std","fulltime","07:36",8,12);
-  writeBasicRow("Full Time Std","fulltime","00:00",13,14);
-  writeBasicRow("Flex Hours Taken","flextaken","00:00",1,14);
-  writeBasicRow("Flex +/- Worked","flexearned","00:00",1,14);
-  writeBasicRow("Flex Closing Balance","flexcbal","00:00",1,14);
+  writeRow2("tg-266k","Flex Opening Balance","flexobal",1,14,"00:00");
+  writeRow2("tg-266k","Ordinary Hours","tota",1,14,"00:00");
+  writeRow2("tg-266k","Full Time Std","fulltime",1,5,"07:36");
+  writeRow2("tg-266k","Full Time Std","fulltime",6,7,"00:00");
+  writeRow2("tg-266k","Full Time Std","fulltime",8,12,"07:36");
+  writeRow2("tg-266k","Full Time Std","fulltime",13,14,"00:00");
+  writeRow2("tg-266k","Flex Hours Taken","flextaken",1,14,"00:00");
+  writeRow2("tg-266k","Flex +/- Worked","flexearned",1,14,"00:00");
+  writeRow2("tg-266k","Flex Closing Balance","flexcbal",1,14,"00:00");
 ?>
-
 </tbody>
 </table>
 </form>
@@ -610,85 +587,30 @@ function clearDay(x) {
   myInit();
 }
 
-function unhide(id) { 
+function togglevis(id) {
   if (id == 'lv') { 
-    var result_style = document.getElementById(id+'annual').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'sick').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'toil').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'phcon').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'flex').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'total').style;
-    result_style.display = 'table-row';
-  } else { 
-    var result_style = document.getElementById(id+'1start').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'1stop').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'2start').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'2stop').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'3start').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'3stop').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'total').style;
-    result_style.display = 'table-row';
+    const lvrows = ["lvannual", "lvsick", "lvtoil", "lvphcon", "lvflex", "lvtotal"];
+    lvrows.forEach(toggle);
+  } else if (id == 'oc') {
+    const ocrows = ["oc1start", "oc1stop", "oc2start", "oc2stop", "oc3start", "oc3stop", "octotal"];
+    ocrows.forEach(toggle);
+  } else if (id == 'ot') {
+    const otrows = ["ot1start", "ot1stop", "ot2start", "ot2stop", "ot3start", "ot3stop", "ottotal"];
+    otrows.forEach(toggle);
+  } else if (id == 'toil') {
+    const toilrows = ["toil1start", "toil1stop", "toil2start", "toil2stop", "toil3start", "toil3stop", "toiltotal", "toil3obal", "toil3tkn", "toilcbal"];
+    toilrows.forEach(toggle);
   }
-  if (id == 'toil') { 
-    var result_style = document.getElementById(id+'obal').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'tkn').style;
-    result_style.display = 'table-row';
-    var result_style = document.getElementById(id+'cbal').style;
-    result_style.display = 'table-row';
-  }
-} 
+}
 
-function rehide(id) { 
-  if (id == 'lv') { 
-    var result_style = document.getElementById(id+'annual').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'sick').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'toil').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'phcon').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'flex').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'total').style;
-    result_style.display = 'none';
-  } else { 
-    var result_style = document.getElementById(id+'1start').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'1stop').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'2start').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'2stop').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'3start').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'3stop').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'total').style;
-    result_style.display = 'none';
-  }
-  if (id == 'toil') { 
-    var result_style = document.getElementById(id+'obal').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'tkn').style;
-    result_style.display = 'none';
-    var result_style = document.getElementById(id+'cbal').style;
-    result_style.display = 'none';
-  }
-} 
+function toggle(id) {
+  var x = document.getElementById(id);
+    if (x.style.display === "none") {
+      x.style.display = "table-row";
+    } else {
+      x.style.display = "none";
+    }
+}
 
 // 2220000
 function calcday(x,flexopening,toilopening) {
