@@ -128,9 +128,9 @@
       ${"day" . $row["dof"] . "toil3stop"} = substr($row["toil3stop"],0,-3);
   }
 ?>
-<form action="<?=$_SERVER['PHP_SELF']; ?>?<?=$_SERVER['argv'][0]; ?>" method="post">
+<form action="<?=$_SERVER['PHP_SELF']; ?>?fne=<?=$fne; ?>" method="post">
 <input type="submit" value="Home" name="home">
-<? if ($loggedinuser != $novellname) {
+<?php if ($loggedinuser != $novellname) {
   echo "<input type=\"submit\" value=\"Approve\" name=\"approve\" onClick=\"return confirm('Approve this timesheet?')\">";
 }
 ?> 
@@ -143,7 +143,7 @@
 </h1>
     <h2><?=$email; ?></h2>
     <div style="position: absolute; top: 50px; right: 25%; ">
-        <? 
+        <?php 
             echo "Submitted " . $submitted . "<br>";
             if ($loggedinuser != $novellname) {
               echo "<input type=\"text\" id=\"flexcb\" name=\"flexcb\">";

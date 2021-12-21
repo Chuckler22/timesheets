@@ -174,9 +174,9 @@
       ${"day" . $row["dof"] . "toil3start"} = substr($row["toil3start"],0,-3);
       ${"day" . $row["dof"] . "toil3stop"} = substr($row["toil3stop"],0,-3);
   }
+
 ?>
-<form action="<?=$_SERVER['PHP_SELF']; ?>?<?=$_SERVER['argv'][0]; ?>" method="post">
-<input type="submit" value="Home" name="home">
+<form action="<?=$_SERVER['PHP_SELF']; ?>?fne=<?=$fne; ?>" method="post"><input type="submit" value="Home" name="home">
 <input type="submit" value="save it" name="save">
 <input type="submit" value="submit it" name="submit">
 <input type="submit" value="logout" name="logout">
