@@ -68,6 +68,8 @@ if($_SERVER['REQUEST_METHOD'] == "POST") {
         }
       }
     }
+    header("location: /timesheet-edit.php?fne=".$fne);
+    exit();
   }
 header("location: /");
 } //endif POST
