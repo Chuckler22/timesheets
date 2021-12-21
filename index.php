@@ -8,12 +8,6 @@ $yearstart = "09 January 2022";
 $loggedinuser = $_SESSION["username"];
 
 require("config.inc.php");
-// Create connection
-$conn = mysqli_connect($servername, $username, $password, $dbname);
-// Check connection
-if (!$conn) { 
-  die("Connection failed: " . mysqli_connect_error());
-}
 
 if($_SERVER['REQUEST_METHOD'] == "POST") {
   if (!isset($_POST["fne_date"])) {
