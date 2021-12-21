@@ -4,24 +4,10 @@ session_start();
 if(!isset($_SESSION["username"])) {
   header("location:./login.php");
 }
-
-$loggedinuser = $_SESSION["username"];
 $yearstart = "09 January 2022";
+$loggedinuser = $_SESSION["username"];
 
-
-$servername = "mysql";
-$username = "root";
-$password = "secret";
-$dbname = "timesheet";
-
-// Create connection
-$conn = mysqli_connect($servername, $username, $password, $dbname);
-// Check connection
-if (!$conn) { 
-  die("Connection failed: " . mysqli_connect_error());
-}
-
-date_default_timezone_set('Australia/Brisbane');
+require("config.inc.php");
 
 if($_SERVER['REQUEST_METHOD'] == "POST") {
   if (!isset($_POST["fne_date"])) {

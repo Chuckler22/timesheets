@@ -6,23 +6,7 @@
   
   $loggedinuser = $_SESSION["username"];
 
-
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-  $servername = "mysql";
-  $username = "root";
-  $password = "secret";
-  $dbname = "timesheet";
-
-  // Create connection
-  $conn = mysqli_connect($servername, $username, $password, $dbname);
-  // Check connection
-  if (!$conn) { 
-    die("Connection failed: " . mysqli_connect_error());
-  }
-  
-  date_default_timezone_set('Australia/Brisbane');
+  require("config.inc.php");
 
   if($_SERVER['REQUEST_METHOD'] == "POST") { 
     if(!empty($_POST["home"])) {

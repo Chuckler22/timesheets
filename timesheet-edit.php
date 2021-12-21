@@ -5,7 +5,7 @@
   }
   $loggedinuser = $_SESSION["username"];
 
-  require("include.php");
+  require("config.inc.php");
 
   // If we're loading this form, it's expected that the loggedinuser is editing their own timesheet
   // based on the contents of $_GET["fne"]
