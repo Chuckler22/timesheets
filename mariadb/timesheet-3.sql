@@ -1,14 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 4.9.7
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Dec 21, 2021 at 07:17 AM
--- Server version: 10.2.41-MariaDB-cll-lve
--- PHP Version: 7.3.33
+-- Host: mysql
+-- Generation Time: Dec 21, 2021 at 03:29 AM
+-- Server version: 10.6.5-MariaDB-1:10.6.5+maria~focal
+-- PHP Version: 7.4.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -19,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `deanwint_timesheets`
+-- Database: `timesheet`
 --
 
 -- --------------------------------------------------------
@@ -92,6 +91,16 @@ CREATE TABLE `employees` (
   `supervisor` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `employees`
+--
+
+INSERT INTO `employees` (`id`, `first`, `last`, `email`, `flexcf`, `toilcf`, `novellname`, `default_daystart`, `default_daystop`, `default_break1start`, `default_break1stop`, `default_break2start`, `default_break2stop`, `default_break3start`, `default_break3stop`, `supervisor`) VALUES
+(1, 'Dean', 'Winter', 'dean.winter@test.org', '00:00:00', NULL, 'winterde', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0),
+(2, 'Adam', 'Smith', 'adam.smith@test.org', '12:34:00', NULL, 'smitha', '09:00:00', '17:00:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 1),
+(3, 'Brian', 'Smith', 'brian.smith@test.org', '-12:34:00', '01:00:00', 'smithb', '08:30:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 2),
+(4, 'Chris', 'Smith', 'chris.smith@test.org', '+02:34:00', '00:00:00', 'smith', '07:30:00', '16:30:00', '12:30:00', '13:00:00', '15:00:00', '15:25:00', NULL, NULL, 2);
+
 -- --------------------------------------------------------
 
 --
@@ -145,25 +154,13 @@ ALTER TABLE `days`
 -- AUTO_INCREMENT for table `employees`
 --
 ALTER TABLE `employees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `timesheets`
 --
 ALTER TABLE `timesheets`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-
-INSERT INTO `employees` (`id`, `first`, `last`, `email`, `flexcf`, `toilcf`, `novellname`, `default_daystart`, `default_daystop`, `default_break1start`, `default_break1stop`, `default_break2start`, `default_break2stop`, `default_break3start`, `default_break3stop`, `supervisor`) VALUES
-(1, 'Bernhard', 'Riemann', 'Bernhard.Riemann@example.com', NULL, NULL, 'riemann', '07:45:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 0),
-(2, 'Carl', 'Gauss', 'Carl.Gauss@example.com', '-01:05:00', NULL, 'gauss', '07:45:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 1),
-(3, 'Leonhard', 'Euler', 'Leonhard.Euler@example.com', '+07:18:00', '+01:00:00', 'euler', '07:45:00', '16:30:00', '12:30:00', '13:00:00', NULL, NULL, NULL, NULL, 2),
-(4, 'Euclid', 'of Alexandria', 'Euclid.ofAlexandria@example.com', NULL, NULL, 'euclid', '09:45:00', '18:00:00', '13:30:00', '14:00:00', NULL, NULL, NULL, NULL, 2);
-
-
-
-
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
