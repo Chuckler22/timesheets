@@ -69,6 +69,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST") {
       }
     }
   }
+header("location: /");
 } //endif POST
 
 // start date
@@ -125,7 +126,6 @@ foreach ($fn as $v) {
 }
 
 ?>
-<button id="homeBtn">Home</button>
 <button id="logoutBtn">Logout</button>
 <script>
   var logoutbtn = document.getElementById('logoutBtn');
@@ -137,11 +137,7 @@ foreach ($fn as $v) {
     document.location.href = './index.php';
   });
 </script>
-<h1>
-    <?=$first; ?>
-    <?=$last; ?>
-</h1>
-    <h2><?=$email; ?></h2>
+<h1>Welcome <?=$first; ?></h1>
 
 <?php
     echo "<form action=\"".$_SERVER['PHP_SELF']."\" method=\"post\">";
