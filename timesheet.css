@@ -3,17 +3,131 @@ form {
   border: 3px solid #f1f1f1;
 }
 
+h1 {
+  margin-bottom: 0px;
+}
+
+.bordered {
+  border: 3px solid #f1f1f1;
+}
+
+.tg  {
+  border-collapse:collapse;
+  border-spacing:0;
+}
+.tg td{
+  border-color:black;
+  border-style:solid;
+  border-width:1px;
+  font-size:14px;
+  overflow:hidden;
+  /* padding:10px 5px; */
+  word-break:normal;
+}
+.tg th{
+  border-color:black;
+  border-style:solid;
+  border-width:1px;
+  font-family:Arial, sans-serif;
+  font-size:14px;
+  font-weight:normal;
+  overflow:hidden;
+  /* padding:10px 5px; */
+  word-break:normal;
+}
+.tg .tg-266k{
+  background-color:#9b9b9b;
+  border-color:inherit;
+  text-align:left;
+  vertical-align:top
+}
+.tg .tg-7od5{
+  background-color:#9aff99;
+  border-color:inherit;
+  text-align:left;
+  vertical-align:top
+}
+.tg .tg-ncd7{
+  background-color:#ffffc7;
+  border-color:inherit;
+  text-align:left;
+  vertical-align:top
+}
+.tg .tg-0lax{
+  text-align:left;
+  vertical-align:top
+}
+.tg .tg-c3ow{
+  border-color:inherit;
+  text-align:center;
+  vertical-align:top
+}
+.tg .tg-c66k{
+  background-color:#9b9b9b;
+  border-color:inherit;
+  text-align:center;
+  vertical-align:top
+}
+.input-time {
+  width: 5em;
+}
+
 /* Full-width inputs */
 input[type=text], input[type=password] {
-  width: 100%;
+/*  width: 100%;
   padding: 12px 20px;
-  margin: 8px 0;
+  margin: 8px 0; */
+  padding: 2px 2px;
+  margin: 4px 4px;
   display: inline-block;
   border: 1px solid #ccc;
   box-sizing: border-box;
 }
 
+input[type=button], input[type=submit], input[type=reset] {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-decoration: none;
+  margin: 4px 2px;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+input[type=button].little {
+  padding: 4px 4px;
+  margin: 0px 0px;
+  min-width: 0px;
+}
+
+input[type=submit].menubar{
+  padding: 4px 4px;
+  margin: 8px 16px;
+  min-width: 180px;
+  position: absolute;
+  top: 5px;
+}
+#home {
+  left: 0px;
+}
+#save {
+  right: 400px;
+}
+#submit {
+  right: 210px;
+}
+#logout {
+  right: 20px;
+}
+
+input[type=button]:disabled, input[type=submit]:disabled, input[type=reset]:disabled {
+  background-color: grey;
+  cursor: not-allowed;
+}
+
 /* Set a style for all buttons */
+/*
 button {
   background-color: #04AA6D;
   color: white;
@@ -23,13 +137,21 @@ button {
   cursor: pointer;
   width: 100%;
 }
-
+*/
 /* Add a hover effect for buttons */
 button:hover {
   opacity: 0.8;
 }
 
 /* Extra style for the cancel button (red) */
+.timesheet {
+  margin: auto;
+  text-align: center;
+  width: 50%;
+  padding: 10px 18px;
+}
+
+
 #loginerror {
   margin: auto;
   text-align: center;

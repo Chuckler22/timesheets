@@ -9,7 +9,7 @@ $loggedinuser = $_SESSION["username"];
 
 require("config.inc.php");
 
-if($_SERVER['REQUEST_METHOD'] == "POST") {
+if (($_SERVER['REQUEST_METHOD'] == "POST") && (isset($_POST["create"]))) {
   if (!isset($_POST["fne_date"])) {
     exit("No fortnight selected.");
   }
@@ -82,7 +82,6 @@ for ($x = 1; $x <= 26; $x++) {
   array_push($fn,date("Y-m-d", $mydate));
 }
 
-
 $openlist = array();
 $closedlist = array();
 $outlist = array();
@@ -113,8 +112,6 @@ mysqli_stmt_execute($userStatement);
 $result = mysqli_stmt_get_result($userStatement);
 while($row = mysqli_fetch_assoc($result)) {
     $first = $row["first"];
-    $last = $row["last"];
-    $email = $row["email"];
     $fne_date = $row["fne_date"];
     if (in_array($fne_date, $fn)) {
       array_push($closedlist,$fne_date);
@@ -127,43 +124,52 @@ foreach ($fn as $v) {
   }
 }
 
-?>
-<button id="logoutBtn">Logout</button>
-<script>
-  var logoutbtn = document.getElementById('logoutBtn');
-  var homebtn = document.getElementById('homeBtn');
-  logoutbtn.addEventListener('click', function() {
-    document.location.href = './logout.php';
-  });
-  homebtn.addEventListener('click', function() {
-    document.location.href = './index.php';
-  });
-</script>
-<h1>Welcome <?=$first; ?></h1>
+echo "<link rel=\"stylesheet\" href=\"timesheet.css\">";
+echo "<a href=\"/logout.php\"><input type=\"button\" value=\"Logout\" style=\"position: fixed; top: 8px; right:8px\"></a>";
 
-<?php
-    echo "<form action=\"".$_SERVER['PHP_SELF']."\" method=\"post\">";
-    echo "<label for=\"timesheet\">Create a new timesheet:</label>";
-    echo "<select id=\"fne_date\" name=\"fne_date\">";
-    foreach ($outlist as $v) {
-      echo "  <option value=\"$v\">Fortnight ending $v</option>";
-    }
-    echo "</select>";
-    echo "  <input type=\"submit\" value=\"create\" name=\"create\">";
-    echo "  </form>";
-    echo "Current timesheets:<br>";
-    echo "<ul>";
-    foreach ($openlist as $v) {
-      echo "<ol><a href=\"./timesheet-edit.php?fne=$v\">$v</a></ol>";
-    }
-    echo "</ul>";
-    echo "Old timesheets:<br>";
-    echo "<ul>";
-    foreach ($closedlist as $v) {
-      echo "<ol><a href=\"./timesheet-view.php?fne=$v\">$v</a></ol>";
-    }
-    echo "</ul>";
-    // exit;
+echo "<br><h1>Welcome ".$first."</h1>";
+
+$status = $statusmessage = NULL;
+echo "<form action=\"".$_SERVER['PHP_SELF']."\" method=\"post\">";
+echo "Create a new timesheet:<br>";
+$v = $outlist[0];
+$w = date_create($v);
+$w = date_format($w,"dS F, Y");
+if (count($openlist) > 0) {
+  $status = "disabled";
+  $statusmessage = "<br>You cannot create a new timesheet until timesheets are submitted.";
+}
+echo "<input type=\"hidden\" name=\"fne_date\" value=\"".$v."\">"; 
+echo "<input type=\"submit\" name=\"create\" value=\"".$w."\" ".$status.">";
+echo $statusmessage;
+echo "  </form>";
+
+$status = $statusmessage = NULL;
+echo "<form>";
+echo "Current timesheet:<br>";
+if (count($openlist) == 0) {
+  echo "<input type=\"button\" value=\"None\" disabled>";
+  echo "<br>You must create a new timesheet to edit.";
+} else {
+  $v = $openlist[0];
+  $w = date_create($v);
+  $w = date_format($w,"dS F, Y");
+  echo "<a href=\"/timesheet-edit.php?fne=".$v."\"><input type=\"button\" value=\"".$w."\"></a>";
+}
+echo "</form>";
+
+
+echo "Previous (approved) timesheets:<br>";
+foreach ($closedlist as $v) {
+  $v = $openlist[0];
+  $w = date_create($v);
+  $w = date_format($w,"dS F, Y");
+  echo "<a href=\"/timesheet-view.php?fne=".$v."\"><input type=\"button\" value=\"".$w."\"></a>";
+}
+
+
+echo "<br><br><br><br><br><br><br><br>";
+
 
     // if supervisor = true display timesheets that are ready for approval
 
