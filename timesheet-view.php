@@ -66,7 +66,7 @@
 
   if(!empty($_POST["approve"])) {
     $sql = "UPDATE `timesheets`, `employees`
-            SET  timesheets.approvedtime = CONVERT_TZ(NOW(),'SYSTEM','Australia/Brisbane'), timesheets.approvedby = ?
+            SET  timesheets.approvedtime = ".$now.", timesheets.approvedby = ?
             WHERE timesheets.employee = employees.id
             AND timesheets.id = ?";
     $updateStatement = mysqli_prepare($conn, $sql);

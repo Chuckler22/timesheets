@@ -112,7 +112,7 @@
 
     // 
     if(!empty($_POST["submit"])) {
-      $sql = "UPDATE `timesheets`, `employees` SET `submitted` = CONVERT_TZ(NOW(),'SYSTEM','Australia/Brisbane'), employees.flexcf = ?, employees.toilcf = ? WHERE timesheets.employee = employees.id AND timesheets.fne_date = ? and timesheets.id = ?";
+      $sql = "UPDATE `timesheets`, `employees` SET `submitted` = ".$now.", employees.flexcf = ?, employees.toilcf = ? WHERE timesheets.employee = employees.id AND timesheets.fne_date = ? and timesheets.id = ?";
       $updateStatement = mysqli_prepare($conn, $sql);
       mysqli_stmt_bind_param($updateStatement,"sssi",$_POST["flexcb"],$_POST["toilcb"],$fne,$timesheet);
       mysqli_stmt_execute($updateStatement);
