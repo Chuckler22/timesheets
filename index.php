@@ -29,7 +29,7 @@ if (($_SERVER['REQUEST_METHOD'] == "POST") && (isset($_POST["create"]))) {
       exit("Timesheet already exists.");
       } else {
       $sql = "SELECT employees.id as employee_id, employees.first, employees.last, employees.email, employees.novellname, 
-              employees.toilcf, employees.default_daystart, employees.default_daystop, employees.default_break1start, 
+              employees.flexcf, employees.toilcf, employees.default_daystart, employees.default_daystop, employees.default_break1start, 
               employees.default_break1stop, employees.default_break2start, employees.default_break2stop, 
               employees.default_break3start, employees.default_break3stop
               from employees 
@@ -39,9 +39,9 @@ if (($_SERVER['REQUEST_METHOD'] == "POST") && (isset($_POST["create"]))) {
       mysqli_stmt_execute($userStatement);
       $result = mysqli_stmt_get_result($userStatement);
       while($row = mysqli_fetch_assoc($result)) {
-        $sql = "INSERT INTO `timesheets` (`id`, `employee`, `fne_date`) VALUES (NULL, ?, ?)";
+        $sql = "INSERT INTO `timesheets` (`id`, `employee`, `fne_date`, `flexcf`, `toilcf`) VALUES (NULL, ?, ?, ?, ?)";
         $insertStatement = mysqli_prepare($conn,$sql);
-        mysqli_stmt_bind_param($insertStatement,'is',$row["employee_id"],$fne);
+        mysqli_stmt_bind_param($insertStatement,'isss',$row["employee_id"],$fne,$row["flexcf"],$row["toilcf"]);
         mysqli_stmt_execute($insertStatement);
         $timesheet_id = mysqli_insert_id($conn); 
         
@@ -85,10 +85,11 @@ for ($x = 1; $x <= 26; $x++) {
 $openlist = array();
 $closedlist = array();
 $outlist = array();
-$sql = "SELECT employees.first, employees.last, employees.email, timesheets.fne_date, timesheets.submitted 
+$pending = array();
+$sql = "SELECT employees.first, employees.last, employees.email, timesheets.fne_date, timesheets.submitted, timesheets.approvedby 
           FROM employees 
           LEFT JOIN timesheets on employees.id = timesheets.employee
-          WHERE timesheets.submitted is NULL AND employees.novellname = ?";
+          WHERE employees.novellname = ?";
 $userStatement = mysqli_prepare($conn,$sql);
 mysqli_stmt_bind_param($userStatement,'s',$loggedinuser);
 mysqli_stmt_execute($userStatement);
@@ -98,28 +99,25 @@ while($row = mysqli_fetch_assoc($result)) {
     $last = $row["last"];
     $email = $row["email"];
     $fne_date = $row["fne_date"];
-    if (in_array($fne_date, $fn)) {
-      array_push($openlist,$fne_date);
+    if ($row["submitted"] == NULL) {
+      if (in_array($fne_date, $fn)) {
+        array_push($openlist,$fne_date);
+      }
     } 
-}
-$sql = "SELECT employees.first, employees.last, employees.email, timesheets.fne_date, timesheets.submitted 
-          FROM employees 
-          LEFT JOIN timesheets on employees.id = timesheets.employee
-          WHERE timesheets.submitted is NOT NULL AND employees.novellname = ?";
-$userStatement = mysqli_prepare($conn,$sql);
-mysqli_stmt_bind_param($userStatement,'s',$loggedinuser);
-mysqli_stmt_execute($userStatement);
-$result = mysqli_stmt_get_result($userStatement);
-while($row = mysqli_fetch_assoc($result)) {
-    $first = $row["first"];
-    $fne_date = $row["fne_date"];
-    if (in_array($fne_date, $fn)) {
-      array_push($closedlist,$fne_date);
-    } 
+    if ($row["submitted"] !== NULL && $row["approvedby"] !== NULL) {
+      if (in_array($fne_date, $fn)) {
+        array_push($closedlist,$fne_date);
+      } 
+    }
+    if ($row["submitted"] !== NULL && $row["approvedby"] == NULL) {
+      if (in_array($fne_date, $fn)) {
+        array_push($pending,$fne_date);
+      } 
+    }
 }
 
 foreach ($fn as $v) {
-  if (!in_array($v,$openlist) && !in_array($v,$closedlist)) {
+  if (!in_array($v,$openlist) && !in_array($v,$closedlist) && !in_array($v,$pending)) {
     array_push($outlist,$v);
   }
 }
@@ -145,7 +143,7 @@ echo $statusmessage;
 echo "  </form>";
 
 $status = $statusmessage = NULL;
-echo "<form>";
+echo "<div class=\"bordered\">";
 echo "Current timesheet:<br>";
 if (count($openlist) == 0) {
   echo "<input type=\"button\" value=\"None\" disabled>";
@@ -156,35 +154,55 @@ if (count($openlist) == 0) {
   $w = date_format($w,"dS F, Y");
   echo "<a href=\"/timesheet-edit.php?fne=".$v."\"><input type=\"button\" value=\"".$w."\"></a>";
 }
-echo "</form>";
+echo "</div>";
 
 
-echo "Previous (approved) timesheets:<br>";
-foreach ($closedlist as $v) {
-  $v = $openlist[0];
-  $w = date_create($v);
-  $w = date_format($w,"dS F, Y");
-  echo "<a href=\"/timesheet-view.php?fne=".$v."\"><input type=\"button\" value=\"".$w."\"></a>";
+
+$status = $statusmessage = NULL;
+if (count($pending) !== 0) {
+  echo "<div class=\"bordered\">";
+  echo "Pending supervisor approval:<br>";
+  foreach ($pending as $v) {
+    $w = date_create($v);
+    $w = date_format($w,"dS F, Y");
+    echo "<a href=\"/timesheet-edit.php?fne=".$v."\"><input type=\"button\" value=\"".$w."\"></a>";
+  }
+  echo "</div>";
 }
 
 
-echo "<br><br><br><br><br><br><br><br>";
 
-
-    // if supervisor = true display timesheets that are ready for approval
-
-    $sql = "SELECT timesheets.id as timesheet_id, timesheets.employee, fne_date, submitted, approvedby, approvedtime, employ.id, employ.first, employ.last, employ.supervisor, super.id, super.novellname FROM `timesheets` LEFT JOIN `employees` employ on timesheets.employee = employ.id LEFT JOIN `employees` super ON employ.supervisor = super.id WHERE submitted IS NOT NULL and approvedby IS NULL AND super.novellname = ?";
-    $userStatement = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($userStatement,'s',$loggedinuser);
-    mysqli_stmt_execute($userStatement);
-    $result = mysqli_stmt_get_result($userStatement);
-    if (mysqli_num_rows($result) > 0) {
-      echo "Timesheets for Approval:<br>";
-      echo "<ul>";
-      while($row = mysqli_fetch_assoc($result)) {
-        echo "<ol>".$row["first"]." ".$row["last"].":  <a href=\"./timesheet-view.php?timesheet=".$row["timesheet_id"]."\">".$row["fne_date"]."</a></ol>";
-      }
-      echo "</ul>";
+// if supervisor = true display timesheets that are ready for approval
+$sql = "SELECT timesheets.id as timesheet_id, timesheets.employee, fne_date, submitted, approvedby, approvedtime, employ.id, employ.first, employ.last, employ.supervisor, super.id, super.novellname FROM `timesheets` LEFT JOIN `employees` employ on timesheets.employee = employ.id LEFT JOIN `employees` super ON employ.supervisor = super.id WHERE submitted IS NOT NULL and approvedby IS NULL AND super.novellname = ?";
+$userStatement = mysqli_prepare($conn, $sql);
+mysqli_stmt_bind_param($userStatement,'s',$loggedinuser);
+mysqli_stmt_execute($userStatement);
+$result = mysqli_stmt_get_result($userStatement);
+if (mysqli_num_rows($result) > 0) {
+  echo "<div class=\"bordered\">";
+  echo "Timesheets for Approval:<br>";
+  while($row = mysqli_fetch_assoc($result)) {
+    $w = date_create($row["fne_date"]);
+    $w = date_format($w,"dS F, Y");
+    echo "<a href=\"/timesheet-view.php?timesheet=".$row["timesheet_id"]."\"><input type=\"button\" value=\"".$row["first"]." ".$row["last"].":".$w."\"></a>";
     }
+  echo "</div>";
+}
+
+$status = $statusmessage = NULL;
+if (count($closedlist) !== 0) {
+  echo "Previous timesheets:<br>";
+  echo "<div class=\"bordered\">";
+  foreach ($closedlist as $v) {
+    $w = date_create($v);
+    $w = date_format($w,"dS F, Y");
+    echo "<a href=\"/timesheet-view.php?fne=".$v."\"><input type=\"button\" value=\"".$w."\"></a>";
+  }
+  echo "</div>";
+}
+
+
+
+
 
 ?>

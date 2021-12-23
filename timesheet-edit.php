@@ -112,9 +112,9 @@
 
     // 
     if(!empty($_POST["submit"])) {
-      $sql = "UPDATE `timesheets` SET `submitted` = CONVERT_TZ(NOW(),'SYSTEM','Australia/Brisbane') WHERE `fne_date` = ? and `id` = ?";
+      $sql = "UPDATE `timesheets`, `employees` SET `submitted` = CONVERT_TZ(NOW(),'SYSTEM','Australia/Brisbane'), employees.flexcf = ?, employees.toilcf = ? WHERE timesheets.employee = employees.id AND timesheets.fne_date = ? and timesheets.id = ?";
       $updateStatement = mysqli_prepare($conn, $sql);
-      mysqli_stmt_bind_param($updateStatement,"si",$fne,$timesheet);
+      mysqli_stmt_bind_param($updateStatement,"sssi",$_POST["flexcb"],$_POST["toilcb"],$fne,$timesheet);
       mysqli_stmt_execute($updateStatement);
       // this is added because this didn't work on one system because of "CONVERT_TZ(NOW(),'SYSTEM','Australia/Brisbane')"
       if (mysqli_affected_rows($conn) == 0) {
@@ -126,7 +126,7 @@
   } // endif method = POST
 
   // Main SQL query for display timesheet
-  $sql = "SELECT employees.id as employees_id, employees.first, employees.last, employees.email, employees.flexcf, employees.toilcf, employees.novellname,
+  $sql = "SELECT employees.id as employees_id, employees.first, employees.last, employees.email, timesheets.flexcf, timesheets.toilcf, employees.novellname,
     timesheets.id as timesheets_id, timesheets.employee, timesheets.fne_date, 
   days.timesheet_id, days.dof, .days.datex as datex, days.daystart, days.daystop, days.break1start, days.break1stop, days.break2start, days.break2stop, days.break3start, days.break3stop, days.oncall, days.lvannual, days.lvsick, days.lvtoil, days.lvphcon, days.lvflex, days.oc1start, days.oc1stop, days.oc2start, days.oc2stop, days.oc3start, days.oc3stop, days.ot1start, days.ot1stop, days.ot2start, days.ot2stop, days.ot3start, days.ot3stop, days.toil1start, days.toil1stop, days.toil2start, days.toil2stop, days.toil3start, days.toil3stop
   FROM `employees`
@@ -178,10 +178,13 @@
 ?>
 <link rel="stylesheet" href="timesheet.css">
 <form action="<?=$_SERVER['PHP_SELF']; ?>?fne=<?=$fne; ?>" method="post">
+<br>
+<input type="text" id="flexcb" name="flexcb" style="display: none;" readonly>
+<input type="text" id="toilcb" name="toilcb" style="display: none;" readonly>
 <input type="submit" value="Home" id="home" name="home" class="menubar">
-<input type="submit" value="save it" id="save" name="save" class="menubar">
-<input type="submit" value="submit it" id="submit" name="submit" class="menubar">
-<input type="submit" value="logout" id="logout" name="logout" class="menubar">
+<input type="submit" value="Save" id="save" name="save" class="menubar">
+<input type="submit" value="Submit" id="submit" name="submit" class="menubar">
+<input type="submit" value="Logout" id="logout" name="logout" class="menubar">
 <script src="./cleave.min.js"></script>
 <h1>
     <?=$first; ?>
@@ -253,6 +256,14 @@ window.addEventListener("load", myInit, true);
     var values = calcday(12,values[0],values[1]);
     var values = calcday(13,values[0],values[1]);
     var values = calcday(14,values[0],values[1]);
+    var flexcmult = values[0] >= 0 ? "+" : "-";
+    var flexcHrs = Math.floor((Math.abs(values[0]) % 86400000) / 3600000); // hours
+    var flexcMins = Math.round(((Math.abs(values[0]) % 86400000) % 3600000) / 60000); // minutes
+    document.getElementById("flexcb").value = flexcmult + ('0000'+flexcHrs).slice(-2) + ":" + ('0000'+flexcMins).slice(-2) + ":00";
+    var toilcmult = values[1] >= 0 ? "+" : "-";
+    var toilcHrs = Math.floor((Math.abs(values[1]) % 86400000) / 3600000); // hours
+    var toilcMins = Math.round(((Math.abs(values[1]) % 86400000) % 3600000) / 60000); // minutes
+    document.getElementById("toilcb").value = toilcmult + ('0000'+toilcHrs).slice(-2) + ":" + ('0000'+toilcMins).slice(-2) + ":00";
 }; 
 
 function clearDay(x) {

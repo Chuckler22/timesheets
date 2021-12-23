@@ -20,6 +20,7 @@
   }
 
   // error handling
+  // if we're coming to this page using the timesheet $_GET variable, check we're a supervisor for this timesheet
   if (isset($_GET["timesheet"])) {
     $sql = "SELECT timesheets.id as timesheet_id,timesheets.employee,`fne_date`,`submitted`,`approvedby`,`approvedtime`, employ.id, employ.first, employ.last, employ.novellname, employ.supervisor, super.id as superid, super.novellname as supernovell FROM `timesheets` LEFT JOIN `employees` employ on timesheets.employee = employ.id LEFT JOIN `employees` super ON employ.supervisor = super.id WHERE submitted IS NOT NULL and approvedby IS NULL AND timesheets.id = ? AND super.novellname = ?";
     $userStatement = mysqli_prepare($conn, $sql);
@@ -38,6 +39,7 @@
   if (!isset($_GET["fne"]) && (!isset($fne))) {
     exit("You must select a fortnight!");
   }
+   // $_GET["fne"] must be in the format YYYY-MM-DD
   if (isset($_GET["fne"])) {
     if (!preg_match('/\d{4}-\d{2}-\d{2}/',$_GET["fne"])) {
       exit("Invalid timesheet format.");
@@ -56,6 +58,7 @@
         $timesheet = $getData['timesheets_id'];
         $novellname = $getData['novellname'];
       } else {
+        // header("Location: /");
         exit("Unable to find timesheet.");
       }
     }
@@ -63,18 +66,17 @@
 
   if(!empty($_POST["approve"])) {
     $sql = "UPDATE `timesheets`, `employees`
-            SET  timesheets.approvedtime = CONVERT_TZ(NOW(),'SYSTEM','Australia/Brisbane'), timesheets.approvedby = ?,
-                employees.flexcf = ?, employees.toilcf = ? 
+            SET  timesheets.approvedtime = CONVERT_TZ(NOW(),'SYSTEM','Australia/Brisbane'), timesheets.approvedby = ?
             WHERE timesheets.employee = employees.id
-                AND timesheets.id = ?";
+            AND timesheets.id = ?";
     $updateStatement = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($updateStatement,"issi",$superid,$_POST["flexcb"],$_POST["toilcb"],$_GET["timesheet"]);
+    mysqli_stmt_bind_param($updateStatement,"ii",$superid,$_GET["timesheet"]);
     mysqli_stmt_execute($updateStatement);
     header("Location: /");
     exit("Header redirect no worky");
   }
   
-  $sql = "SELECT employees.id as employees_id, employees.first, employees.last, employees.email, employees.flexcf, employees.toilcf, employees.novellname,
+  $sql = "SELECT employees.id as employees_id, employees.first, employees.last, employees.email, timesheets.flexcf, timesheets.toilcf, employees.novellname,
     timesheets.id as timesheets_id, timesheets.employee, timesheets.fne_date, timesheets.submitted, timesheets.approvedby, timesheets.approvedtime,
     days.timesheet_id, days.dof, .days.datex as datex, days.daystart, days.daystop, days.break1start, days.break1stop, days.break2start, days.break2stop, days.break3start, days.break3stop, days.oncall, days.lvannual, days.lvsick, days.lvtoil, days.lvphcon, days.lvflex, days.oc1start, days.oc1stop, days.oc2start, days.oc2stop, days.oc3start, days.oc3stop, days.ot1start, days.ot1stop, days.ot2start, days.ot2stop, days.ot3start, days.ot3stop, days.toil1start, days.toil1stop, days.toil2start, days.toil2stop, days.toil3start, days.toil3stop,
     super.first as firstname, super.last as lastname
@@ -131,29 +133,27 @@
   }
 ?>
 <link rel="stylesheet" href="timesheet.css">
-<form action="<?=$_SERVER['PHP_SELF']; ?>?fne=<?=$fne; ?>" method="post">
-<input type="submit" value="Home" name="home">
+<form action="<?=$_SERVER['REQUEST_URI']; ?>" method="post">
+<input type="submit" value="Home" id="home" name="home" class="menubar">
 <?php if ($loggedinuser != $novellname) {
-  echo "<input type=\"submit\" value=\"Approve\" name=\"approve\" onClick=\"return confirm('Approve this timesheet?')\">";
+  echo "<input type=\"submit\" value=\"Approve\" id=\"approve\" name=\"approve\" class=\"menubar\" onClick=\"return confirm('Approve this timesheet?')\">";
 }
 ?> 
-
-<input type="submit" value="Logout" name="logout">
+<input type="submit" value="Logout" id="logout" name="logout" class="menubar">
 <script src="./cleave.min.js"></script>
 <h1>
     <?=$first; ?>
     <?=$last; ?>
 </h1>
-    <h2><?=$email; ?></h2>
-    <div style="position: absolute; top: 50px; right: 25%; ">
+    <div style="position: absolute; top: 8px; left: 250px;" class="bordered">
         <?php 
             if ($submitted != NULL) {
             echo "Submitted " . $submitted . "<br>";
             }
-            if ($loggedinuser != $novellname) {
-              echo "<input type=\"text\" id=\"flexcb\" name=\"flexcb\">";
-              echo "<input type=\"text\" id=\"toilcb\" name=\"toilcb\">";
-            }
+            // if ($loggedinuser != $novellname) {
+            //   echo "<input type=\"text\" id=\"flexcb\" name=\"flexcb\">";
+            //  echo "<input type=\"text\" id=\"toilcb\" name=\"toilcb\">";
+            // }
             if (isset($approved)) {
               echo "Approved at " . $approvedtime . "<br>";
               echo "Approved by " . $approvedby . "<br>";

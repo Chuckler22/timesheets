@@ -23,10 +23,10 @@ if(isset($_SESSION["error"])){
 
   <div class="container">
     <label for="uname"><b>Username</b></label>
-    <input type="text" placeholder="Enter Username" name="username" required>
+    <input type="text" placeholder="Enter Username" name="username" class="logininput" required>
 
     <label for="psw"><b>Password</b></label>
-    <input type="password" placeholder="Enter Password" name="password" required>
+    <input type="password" placeholder="Enter Password" name="password" class="logininput" required>
 
     <button type="submit" id="login" name="login" value="login">LOGIN</button>
   </div>

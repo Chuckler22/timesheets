@@ -114,14 +114,14 @@ echo "<tbody>";
     }
     if ($a == 1 && isset($style)) {
       echo "  <tr id=\"".$shortdesc."\" style=\"display: table-row;\">\n";
-      echo "    <td class=\"tg-0pky\">$linename</td>\n";
+      echo "    <td class=\"$bg\">$linename</td>\n";
     } elseif ($a == 1 && !isset($style)) {
       echo "  <tr id=\"".$shortdesc."\" style=\"display: none;\">\n";
-      echo "    <td class=\"tg-0pky\">$linename</td>\n";
+      echo "    <td class=\"$bg\">$linename</td>\n";
     }
     for ($x = $a; $x <= $b; $x++) {
       if (isset($initialvalue)) {
-        echo "    <td class=\"tg-0lax\"><p id=\"day".$x.$shortdesc."\" name=\"day".$x.$shortdesc."\">$initialvalue</p></td>\n";
+        echo "    <td class=\"$bg\"><p id=\"day".$x.$shortdesc."\" name=\"day".$x.$shortdesc."\">$initialvalue</p></td>\n";
       } else {
         echo "    <td class=\"$bg\"><input type=\"text\" class=\"input-time\" id=\"day".$x.$shortdesc."\" name=\"day".$x.$shortdesc."\" value=\"".${"day".$x.$shortdesc}."\" onchange=\"myInit()\" ".$status."></td>\n";
       }
@@ -178,9 +178,9 @@ echo "<tbody>";
   writeRow2("tg-0pky","Day Stop","stop",8,12);
   writeRow2("tg-266k","Day Stop","stop",13,14);
   echo "<tr>";
-  echo "  <td class=\"tg-0lax\">Total</td>";
+  echo "  <td class=\"tg-7od5\">Total</td>";
   for ($x = 1; $x <= 14; $x++) {
-    echo "<td class=\"tg-0lax\"><p id=\"day".$x."tot\">00:00</p></td>";
+    echo "<td class=\"tg-7od5\"><p id=\"day".$x."tot\">00:00</p></td>";
   }
   echo "</tr>";
   echo "<tr>";
@@ -247,8 +247,7 @@ echo "<tbody>";
   writeRow2("tg-266k","Flex Taken","lvflex",6,7);
   writeRow2("tg-ncd7","Flex Taken","lvflex",8,12);
   writeRow2("tg-266k","Flex Taken","lvflex",13,14);
-  writeRow2("tg-0lax","Leave Total","lvtot",1,14,"00:00");
-
+  writeRow2("tg-7od5","Leave Total","lvtot",1,14,"00:00");
   echo "<tr><td colspan=\"15\">";
   $leavetoggle = ($mode == "edit") ? "<input type=\"button\" value=\"Toggle Oncall\" class=\"little\" onclick=\"togglevis('oc')\">" : "";
   echo $leavetoggle;
@@ -277,14 +276,7 @@ echo "<tbody>";
   writeRow2("tg-266k","OC3 Stop","oc3stop",6,7);
   writeRow2("tg-7od5","OC3 Stop","oc3stop",8,12);
   writeRow2("tg-266k","OC3 Stop","oc3stop",13,14);
-  writeRow2("tg-0lax","Oncall Total","octot",1,14,"00:00");
-  // $leavetotal = ($mode == "edit") ? "<tr id=\"octotal\" style=\"display: none;\">" : "<tr id=\"octotal\">";
-  // echo $leavetotal;
-  // echo "  <td class=\"tg-0lax\">Oncall Total</td>";
-  // for ($x = 1; $x <= 14; $x++) {
-  //   echo "<td class=\"tg-0lax\"><p id=\"day".$x."octot\">00:00</p></td>";
-  // }
-  // echo "</tr>";
+  writeRow2("tg-7od5","Oncall Total","octot",1,14,"00:00");
   echo "<tr><td colspan=\"15\">";
   $leavetoggle = ($mode == "edit") ? "<input type=\"button\" value=\"Toggle OT\" class=\"little\" onclick=\"togglevis('ot')\">" : "";
   echo $leavetoggle;
@@ -313,14 +305,7 @@ echo "<tbody>";
   writeRow2("tg-266k","OT3 Stop","ot3stop",6,7);
   writeRow2("tg-7od5","OT3 Stop","ot3stop",8,12);
   writeRow2("tg-266k","OT3 Stop","ot3stop",13,14);
-  writeRow2("tg-0lax","OT Total","ottot",1,14,"00:00");
-  // $leavetotal = ($mode == "edit") ? "<tr id=\"octotal\" style=\"display: none;\">" : "<tr id=\"ottotal\">";
-  // echo $leavetotal;
-  // echo "  <td class=\"tg-0lax\">OT Total</td>";
-  // for ($x = 1; $x <= 14; $x++) {
-  //   echo "<td class=\"tg-0lax\"><p id=\"day".$x."ottot\">00:00</p></td>";
-  // }
-  // echo "</tr>";
+  writeRow2("tg-7od5","OT Total","ottot",1,14,"00:00");
   echo "<tr><td colspan=\"15\">";
   $leavetoggle = ($mode == "edit") ? "<input type=\"button\" value=\"Toggle TOIL\" class=\"little\" onclick=\"togglevis('toil')\">" : "";
   echo $leavetoggle;
@@ -350,54 +335,24 @@ echo "<tbody>";
   writeRow2("tg-7od5","TOIL3 Stop","toil3stop",8,12);
   writeRow2("tg-266k","TOIL3 Stop","toil3stop",13,14);
   writeRow2("tg-0lax","TOIL Earned","toiltot",1,14,"00:00");
-  writeRow2("tg-0lax","TOIL Opening Balance","toilobal",1,14,"00:00");
+  writeRow2("tg-ncd7","TOIL Opening Balance","toilobal",1,14,"00:00");
   writeRow2("tg-0lax","TOIL Taken","toiltkn",1,14,"00:00");
-  writeRow2("tg-0lax","TOIL Closing Balance","toilcbal",1,14,"00:00");
-/*
-  $leavetotal = ($mode == "edit") ? "<tr id=\"toiltotal\" style=\"display: none;\">" : "<tr id=\"toiltotal\">";
-  echo $leavetotal;
-  echo "  <td class=\"tg-0lax\">TOIL Earned</td>";
-  for ($x = 1; $x <= 14; $x++) {
-    echo "<td class=\"tg-0lax\"><p id=\"day".$x."toiltot\">00:00</p></td>";
-  }
-  echo "</tr>";
-  $leavetotal = ($mode == "edit") ? "<tr id=\"toilobal\" style=\"display: none;\">" : "<tr id=\"toilobal\">";
-  echo $leavetotal;
-  echo "  <td class=\"tg-0lax\">TOIL Opening Balance</td>";
-  for ($x = 1; $x <= 14; $x++) {
-    echo "<td class=\"tg-0lax\"><p id=\"day".$x."toilobal\">00:00</p></td>";
-  }
-  echo "</tr>";
-  $leavetotal = ($mode == "edit") ? "<tr id=\"toiltkn\" style=\"display: none;\">" : "<tr id=\"toiltkn\">";
-  echo $leavetotal;
-  echo "  <td class=\"tg-0lax\">TOIL Taken</td>";
-  for ($x = 1; $x <= 14; $x++) {
-    echo "<td class=\"tg-0lax\"><p id=\"day".$x."toiltkn\">00:00</p></td>";
-  }
-  echo "</tr>";
-  $leavetotal = ($mode == "edit") ? "<tr id=\"toilcbal\" style=\"display: none;\">" : "<tr id=\"toilcbal\">";
-  echo $leavetotal;
-  echo "  <td class=\"tg-0lax\">TOIL Closing Balance</td>";
-  for ($x = 1; $x <= 14; $x++) {
-    echo "<td class=\"tg-0lax\"><p id=\"day".$x."toilcbal\">00:00</p></td>";
-  }
-  echo "</tr>";
-  */
+  writeRow2("tg-ncd7","TOIL Closing Balance","toilcbal",1,14,"00:00");
   echo "<tr>";
   echo "  <td colspan=\"15\">";
   echo "    <div id=\"day0flexcbal\" style=\"display: none;\">" . $flexcf . "</div>";
   echo "    <div id=\"day0toilcbal\" style=\"display: none;\">" . $toilcf . "</div>";
   echo "  </td>";
   echo "</tr>";
-  writeRow2("tg-266k","Flex Opening Balance","flexobal",1,14,"00:00");
-  writeRow2("tg-266k","Ordinary Hours","tota",1,14,"00:00");
-  writeRow2("tg-266k","Full Time Std","fulltime",1,5,"07:36");
-  writeRow2("tg-266k","Full Time Std","fulltime",6,7,"00:00");
-  writeRow2("tg-266k","Full Time Std","fulltime",8,12,"07:36");
-  writeRow2("tg-266k","Full Time Std","fulltime",13,14,"00:00");
-  writeRow2("tg-266k","Flex Hours Taken","flextaken",1,14,"00:00");
-  writeRow2("tg-266k","Flex +/- Worked","flexearned",1,14,"00:00");
-  writeRow2("tg-266k","Flex Closing Balance","flexcbal",1,14,"00:00");
+  writeRow2("tg-7od5","Flex Opening Balance","flexobal",1,14,"00:00");
+  writeRow2("tg-ncd7","Ordinary Hours","tota",1,14,"00:00");
+  writeRow2("tg-ncd7","Full Time Std","fulltime",1,5,"07:36");
+  writeRow2("tg-ncd7","Full Time Std","fulltime",6,7,"00:00");
+  writeRow2("tg-ncd7","Full Time Std","fulltime",8,12,"07:36");
+  writeRow2("tg-ncd7","Full Time Std","fulltime",13,14,"00:00");
+  writeRow2("tg-7od5","Flex Hours Taken","flextaken",1,14,"00:00");
+  writeRow2("tg-ncd7","Flex +/- Worked","flexearned",1,14,"00:00");
+  writeRow2("tg-7od5","Flex Closing Balance","flexcbal",1,14,"00:00");
 echo "</tbody>";
 echo "</table>";
 ?>
