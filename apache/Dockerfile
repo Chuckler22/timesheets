@@ -12,7 +12,9 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf &&\
 
 RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
 RUN apt update && apt install -y libldap2-dev && docker-php-ext-install ldap && rm -rf /var/lib/apt/lists/*
- 
+COPY composer.sh /usr/bin/composer.sh
+RUN chmod +x /usr/bin/composer.sh
+RUN apt update && apt install -y git
 
 
 EXPOSE 80
